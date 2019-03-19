@@ -23,7 +23,11 @@ scale = matplotlib.pyplot.imcrop(scale,[0 1000 3000 500])    #FIX ME HARDCODED, 
 plt.figure()          #Display cropped image for testing
 plt.imshow(scale)
 plt.show
-#----------------------------------------------------------------------------
+
+##gray = scale.convert('L')        #convert colored image(scale), save resulting bw image to bwscal
+##bw = gray.point(lambda x: 0 if x<128 else 255, '1')
+##bw.save("scale_bw.png")
+
 #scale = imrotate(scale, -2.5); ##FIX ME HARDCODE, Purpose: rotate image to unskew the ruler. 
 #This will need to be automated instead of the -2.5 degree hard code.
 bwScale = im2bw(scale)       #convert colored image(scale), save resulting bw image to bwscale
@@ -34,6 +38,7 @@ scaleProfile = sum(bwScale)  #  crate a profile by summing pixel values
 #figure; plot(scaleProfile);
 ###FIX ME, MISSING CODE. To calculate the actual scale based on the bw scale instead of the hardcoded 40 pixels.
 %%% from scale we have that 40 pixels is 1 mm %%%%
+#----------------------------------------------------------------------------
 
 % %% Apply smooting
 % w = gausswin(25)  # create a guassian smoothing object
