@@ -1,6 +1,7 @@
 import matplotlib
 import matplotlib.pyplot as plt
 import numpy as np
+import cv2
 
 import PIL
 from PIL import Image
@@ -40,7 +41,9 @@ scaleProfile = sum(bwScale)  #  crate a profile by summing pixel values
 %%% from scale we have that 40 pixels is 1 mm %%%%
 #----------------------------------------------------------------------------
 
-% %% Apply smooting
+% %% Apply smoothing
+  blur = []
+  blur = cv2.GaussianBlur(bwscale,(25,25),0) #create a guassian blurred object
 % w = gausswin(25)  # create a guassian smoothing object
 % y = conv(scaleProfile,w)    # convolve scale profile with gaussian smoothing
 % scaleDeriv = diff(y)    # find derivative of smoothed profile
