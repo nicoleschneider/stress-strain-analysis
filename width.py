@@ -1,5 +1,7 @@
+#PYTHON
 import matplotlib
 import matplotlib.pyplot as plt
+import matplotlib.image as mpimg
 import numpy as np
 import cv2
 
@@ -40,7 +42,7 @@ scaleProfile = sum(bwScale)  #  crate a profile by summing pixel values
 ###FIX ME, MISSING CODE. To calculate the actual scale based on the bw scale instead of the hardcoded 40 pixels.
 %%% from scale we have that 40 pixels is 1 mm %%%%
 #----------------------------------------------------------------------------
-
+#NOTPYTHON
 % %% Apply smoothing
   blur = []
   blur = cv2.GaussianBlur(bwscale,(25,25),0) #create a guassian blurred object
@@ -61,21 +63,26 @@ scaleProfile = sum(bwScale)  #  crate a profile by summing pixel values
 % end
 % 
 scaleFactor = 40; %mean(peakSpacing) % pixels per mm   # hardcoded as 40, but should be calculated using mean(peakSpacing)
-
-%%   # list of different specimen images to test on
+#----------------------------------------------------------------------------
+#PYTHON
+ # list of different specimen images to test on
 filename = '2018.tif'
 %filename = '171117 DSC_0284.tif'
 %filename = 'DSC_0176_01(Round2).tif'
 %filename = 'CUspecimen1.tif'
-img = imread(filename)    # read in image from file
-%img = imrotate(img, 90) %% FIX ME for 171117 DSC_0285 only   # this image was skewed so rotate it, should be automated in future.
+img=cv2.imread('filename',)    # read in image from file
+#----------------------------------------------------------------------------
+#NOTPYTHON
+%img = imrotate(img, 90)    # FIX ME for 171117 DSC_0285 only   # this image was skewed so rotate it, should be automated in future.
 %img = img(:,1850:length(img(1))) %% FIX ME same as above    # hardcoded cropping that should be fixed in future
 %%
 % new stuff 12/2/2018
 % from: https://www.mathworks.com/help/images/detecting-a-cell-using-image-segmentation.html
-
+#----------------------------------------------------------------------------
     # Edge detection code
-I = rgb2gray(img)   # convert image to grayscale
+Igray = cv2.cvtColor(img0, cv2.COLOR_BGR2GRAY)
+imgG = cv2.GaussianBlur(Igray,(3,3),0)
+#I = rgb2gray(img)   # convert image to grayscale
 [~, threshold] = edge(I, 'sobel')    # sobel type of edge detection
 fudgeFactor = 1
 BWs = edge(I,'sobel', threshold * fudgeFactor)    # run edge detector
