@@ -3,10 +3,10 @@
 
 %% Scaling
 
-%scale = imread('.01mm.jpg');
-scale = imread('2018_scale.tif');
-%figure; imshow(scale);
-scale = imcrop(scale,[0 1000 3000 500]);
+scale = imread('.01mm.jpg');
+%scale = imread('2018_scale.tif');
+figure; imshow(scale);
+%scale = imcrop(scale,[0 1000 3000 500]);
 %%figure; imshow(scale);
 %scale = imrotate(scale, -2.5); %%FIX ME HARDCODE
 bwScale = im2bw(scale);
@@ -35,13 +35,13 @@ format long;
 %     peakSpacing = [peakSpacing, peaks(i+1) - peaks(i)];
 % end
 % 
-scaleFactor = 40; %mean(peakSpacing) % pixels per mm
+scaleFactor = 22.09; %mean(peakSpacing) % pixels per mm
 
 %%
-filename = '2018.tif';
+%filename = '2018.tif';
 %filename = '171117 DSC_0284.tif';
 %filename = 'DSC_0176_01(Round2).tif';
-%filename = 'CUspecimen1.tif';
+filename = 'CUspecimen1.tif';
 img = imread(filename);
 %img = imrotate(img, 90); %% FIX ME for 171117 DSC_0285 only
 %img = img(:,1850:length(img(1))); %% FIX ME same as above
@@ -87,8 +87,10 @@ BW = edge(img,'approxcanny', 0.5);
 BW = imrotate(BW, 90);
 figure; imshow(BW)
 
-
+%%
 % Connected component analysis
+BW = im2bw(img);
+BW = imcrop(BW,[556 0 3260 4917]);
 L = bwlabel(imcomplement(BW));
 RGB = label2rgb(L);
 figure; imshow(RGB)
@@ -96,7 +98,7 @@ figure; imshow(RGB)
 conComp = bwconncomp(BW);
 numPixels = cellfun(@numel,conComp.PixelIdxList);
 [area,idx] = max(numPixels);
-area;
+area
 %BW(conComp.PixelIdxList{idx}) = 0;
 
 hProf = mean(BW, 2);
@@ -141,8 +143,50 @@ end
 maxStart = idxMaxArr(1) % first all black column
 maxLast = idxMaxArr(size(idxMaxArr')) % last all black column
 maxWidth = maxLast(1) - maxStart(1)
+%% 5/15/19
+BW_clean = imcrop(BW,[0 0 3260 4860]);
+imshow(BW_clean)
+
+img_width = size(BW_clean(1,:))
+img_height = size(BW_clean(:,1))
+
+D_0 = 0
+for X = 1 : img_height
+    D_i_pixCount = 0;
+    for I = 1 : img_width(2)
+        if BW_clean(X,I) == 0
+            D_i_pixCount = D_i_pixCount + 1;
+        end
+    end
+    if D_i_pixCount > D_0
+        D_0 = D_i_pixCount
+    end
+end
+D_0
+%%
+% output epsilon values to a file
+A = 3;
+fileID = fopen('out.txt','w');
+fprintf(fileID,'%6s %12s\r\n','Pixel Row','strain');
 
 
+D_0 = 2143  % FOUND AFTER RUNNING CODE ONCE
+for X = 1 : img_height
+    D_i_pixCount = 0;
+    for I = 1 : img_width(2)
+        if BW_clean(X,I) == 0
+            D_i_pixCount = D_i_pixCount + 1;
+        end
+    end
+    
+    epsilon = (D_0^2)/(D_i_pixCount^2) - 1
+    A = [X;epsilon];
+    fprintf(fileID,'%6.0f %22.15f\r\n',A);
+    %fprintf(fileID,'\n');
+end
+
+
+fclose(fileID);
 %%
 
 % scaledMinWidth = minWidth / scaleFactor;
