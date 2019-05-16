@@ -1,5 +1,6 @@
-% process image of necked specimen to determine width
+% process image of necked specimen to determine strain
 % Nicole Schneider
+% Fall 2017 to Spring 2019
 
 %% Scaling
 
@@ -9,15 +10,16 @@ figure; imshow(scale);
 %scale = imcrop(scale,[0 1000 3000 500]);
 %%figure; imshow(scale);
 %scale = imrotate(scale, -2.5); %%FIX ME HARDCODE
-bwScale = im2bw(scale);
+bwScale = im2bw(scale);  % convert scale image to black and white
 %figure; imshow(bwScale)
 scaleProfile = sum(bwScale);
 %figure; plot(scaleProfile);
 
-%%% from scale we have that 40 pixels is 1 mm %%%%
+%%% from scale we have that 40 pixels is 1 mm %%%% (for 2018_Scale.tif)
 
 format long;
 
+%% code to automatically find scale conversion using spacing between peaks in profile of ruler
 % %% Apply smooting
 % w = gausswin(25);
 % y = conv(scaleProfile,w);
@@ -35,19 +37,23 @@ format long;
 %     peakSpacing = [peakSpacing, peaks(i+1) - peaks(i)];
 % end
 % 
-scaleFactor = 22.09; %mean(peakSpacing) % pixels per mm
+scaleFactor = 22.09; %mean(peakSpacing) % pixels per mm (for .01mm.jpg file)
 
 %%
+% choose an image to use by uncommenting one of the ones below or adding your own in this format
 %filename = '2018.tif';
 %filename = '171117 DSC_0284.tif';
 %filename = 'DSC_0176_01(Round2).tif';
 filename = 'CUspecimen1.tif';
 img = imread(filename);
-%img = imrotate(img, 90); %% FIX ME for 171117 DSC_0285 only
-%img = img(:,1850:length(img(1))); %% FIX ME same as above
+%img = imrotate(img, 90); %% FIX ME for 171117 DSC_0285 only, hardcoded to get rid of background garbage
+%img = img(:,1850:length(img(1))); %% FIX ME hardcode cropping the image to get rid of garbage in backgrounud
+
+
 %%
 % new stuff 12/2/2018
 % from: https://www.mathworks.com/help/images/detecting-a-cell-using-image-segmentation.html
+% the code in this section is to do edge detection which helps find the specimen in the image
 
 I = rgb2gray(img);
 [~, threshold] = edge(I, 'sobel');
@@ -79,7 +85,7 @@ Segout(BWoutline) = 255;
 figure, imshow(Segout), title('outlined original image');
 
 %%
-
+% more edge detection stuff
 %figure; imshow(img)
 %BW = img; %im2bw(img);
 img = rgb2gray(img);
@@ -89,8 +95,9 @@ figure; imshow(BW)
 
 %%
 % Connected component analysis
+% this is to extract the specimen as one large group of pixels
 BW = im2bw(img);
-BW = imcrop(BW,[556 0 3260 4917]);
+BW = imcrop(BW,[556 0 3260 4917]);  % hardcode crop to get rid of background garbage
 L = bwlabel(imcomplement(BW));
 RGB = label2rgb(L);
 figure; imshow(RGB)
@@ -101,6 +108,7 @@ numPixels = cellfun(@numel,conComp.PixelIdxList);
 area
 %BW(conComp.PixelIdxList{idx}) = 0;
 
+% show the profiles found
 hProf = mean(BW, 2);
 figure; plot(hProf)
 hSum = sum(BW, 2);
@@ -124,7 +132,7 @@ end
 
 start = idxMinArr(1) % first all black column
 last = idxMinArr(size(idxMinArr')) % last all black column
-minWidth = last(1) - start(1)
+minWidth = last(1) - start(1)  % the minimum diameter of the specimen
 
 %% 
 vMean = mean(BW);
@@ -143,8 +151,14 @@ end
 maxStart = idxMaxArr(1) % first all black column
 maxLast = idxMaxArr(size(idxMaxArr')) % last all black column
 maxWidth = maxLast(1) - maxStart(1)
-%% 5/15/19
-BW_clean = imcrop(BW,[0 0 3260 4860]);
+
+
+%% from 5/15/19
+% this code finds the strain at every row of pixels
+% you can run only the initial section to import the image and then this to calculate the strain
+% without using edge detection or connected component analysis
+
+BW_clean = imcrop(BW,[0 0 3260 4860]); % hardcode crop to get rid of garbage in background
 imshow(BW_clean)
 
 img_width = size(BW_clean(1,:))
@@ -163,9 +177,9 @@ for X = 1 : img_height
     end
 end
 D_0
+
 %%
 % output epsilon values to a file
-A = 3;
 fileID = fopen('out.txt','w');
 fprintf(fileID,'%6s %12s\r\n','Pixel Row','strain');
 
@@ -180,15 +194,14 @@ for X = 1 : img_height
     end
     
     epsilon = (D_0^2)/(D_i_pixCount^2) - 1
-    A = [X;epsilon];
-    fprintf(fileID,'%6.0f %22.15f\r\n',A);
-    %fprintf(fileID,'\n');
+    A = [X; epsilon];
+    fprintf(fileID,'%6.0f %22.15f\r\n', A);
 end
 
-
 fclose(fileID);
-%%
 
+%%
+% calculations using scale factors calculated earlier
 % scaledMinWidth = minWidth / scaleFactor;
 % scaledMinWidth
 % 
