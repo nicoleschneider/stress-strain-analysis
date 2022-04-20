@@ -4,9 +4,9 @@
 
 %% Scaling
 
-scale = imread('.01mm.jpg');
+scale = imread('./01mm.jpg');
 %scale = imread('2018_scale.tif');
-figure; imshow(scale);
+figure; imshow(scale), title('scale image');
 %scale = imcrop(scale,[0 1000 3000 500]);
 %%figure; imshow(scale);
 %scale = imrotate(scale, -2.5); %%FIX ME HARDCODE
@@ -55,7 +55,7 @@ img = imread(filename);
 % from: https://www.mathworks.com/help/images/detecting-a-cell-using-image-segmentation.html
 % the code in this section is to do edge detection which helps find the specimen in the image
 
-I = rgb2gray(img);
+I = im2gray(img);
 [~, threshold] = edge(I, 'sobel');
 fudgeFactor = 1;
 BWs = edge(I,'sobel', threshold * fudgeFactor);
@@ -88,10 +88,10 @@ figure, imshow(Segout), title('outlined original image');
 % more edge detection stuff
 %figure; imshow(img)
 %BW = img; %im2bw(img);
-img = rgb2gray(img);
+img = im2gray(img);
 BW = edge(img,'approxcanny', 0.5);
 BW = imrotate(BW, 90);
-figure; imshow(BW)
+figure; imshow(BW), title('rotated image with edge detection');
 
 %%
 % Connected component analysis
@@ -100,7 +100,7 @@ BW = im2bw(img);
 BW = imcrop(BW,[556 0 3260 4917]);  % hardcode crop to get rid of background garbage
 L = bwlabel(imcomplement(BW));
 RGB = label2rgb(L);
-figure; imshow(RGB)
+figure; imshow(RGB), title('RGB representation of connected components');
 
 conComp = bwconncomp(BW);
 numPixels = cellfun(@numel,conComp.PixelIdxList);
@@ -112,12 +112,12 @@ area
 hProf = mean(BW, 2);
 figure; plot(hProf)
 hSum = sum(BW, 2);
-figure; plot(hSum)
+figure; plot(hSum), title('Horizontal Profile (pixel measurements)');
 
 vProf = mean(BW);
 figure; plot(vProf)
 vSum = sum(BW);
-figure; plot(vSum)
+figure; plot(vSum), title('Vertical Profile (pixel measurements)');
 
 
 [m, n] = size(vSum);
